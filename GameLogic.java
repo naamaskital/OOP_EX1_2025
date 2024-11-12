@@ -7,6 +7,8 @@ public class GameLogic implements PlayableLogic{
     private Player player2;
     private boolean turn=true;
 
+    
+
 
 
     @Override
