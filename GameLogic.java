@@ -36,6 +36,15 @@ public class GameLogic implements PlayableLogic{
     public List<Position> ValidMoves() {
         return List.of();
     }
+    private boolean possibleLocation(Position position,Player player){
+        if(gameBoard[position.col()][position.row()]!=null){
+            return false;
+        }
+        for (int i = 0; i < sizeBoard; i++) {
+
+
+        }
+    }
 
     @Override
     public int countFlips(Position a) {
