@@ -1,13 +1,13 @@
  abstract class Disc{
-    protected Player player;
-    protected  Position POSITION;
+    protected Player owner;
+    protected Position POSITION;
     /**
  * Get the player who owns the Disc.
  *
  * @return The player who is the owner of this game disc.
  */
 public Player getOwner(){
-    return player;
+    return owner;
 }
 
 /**
@@ -15,7 +15,7 @@ public Player getOwner(){
  *
  */
 public void setOwner(Player player){
-    this.player = player;
+    this.owner = player;
 }
 
 /**
