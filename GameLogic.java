@@ -7,6 +7,7 @@ public class GameLogic implements PlayableLogic{
     private Player player1;
     private Player player2;
     private boolean turn=true;
+    int countDiscs=4;
 
 
 
@@ -151,10 +152,7 @@ public class GameLogic implements PlayableLogic{
 
     @Override
     public boolean isGameFinished() {
-        if (!ValidMoves().isEmpty()) {
-            return false;
-        }
-        return true;
+        return ValidMoves().isEmpty();
     }
 
     @Override
