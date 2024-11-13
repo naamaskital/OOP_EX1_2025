@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class GameLogic implements PlayableLogic{
@@ -8,16 +9,12 @@ public class GameLogic implements PlayableLogic{
     private boolean turn=true;
 
 
-
-
-
     @Override
     public boolean locate_disc(Position a, Disc disc) {
         if(ValidMoves().contains(a)){
             gameBoard[a.col()][a.row()] = disc;
             turn =!turn; // change the current player.
             return true;
-
         }
         return false;
     }
@@ -34,8 +31,11 @@ public class GameLogic implements PlayableLogic{
 
     @Override
     public List<Position> ValidMoves() {
+
         return List.of();
     }
+
+
     private boolean possibleLocation(Position position,Player player){
         if(gameBoard[position.col()][position.row()]!=null){
             return false;
@@ -44,7 +44,12 @@ public class GameLogic implements PlayableLogic{
 
 
         }
+        return true;
     }
+
+
+
+
 
     @Override
     public int countFlips(Position a) {
@@ -83,7 +88,16 @@ public class GameLogic implements PlayableLogic{
 
     @Override
     public void reset() {
+        for (int i = 0; i < gameBoard.length; i++) {
+            for (int j = 0; j < gameBoard[0].length; j++) {
+                gameBoard[i][j] = null;
+            }
+        }
 
+        gameBoard[3][3] = new SimpleDisc(player1, new Position(3, 3));
+        gameBoard[3][4] = new SimpleDisc(player2, new Position(3, 4));
+        gameBoard[4][3] = new SimpleDisc(player2, new Position(4, 3));
+        gameBoard[4][4] = new SimpleDisc(player1, new Position(4, 4));
 
     }
 

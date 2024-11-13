@@ -7,6 +7,8 @@ public class SimpleDisc extends Disc{
     public SimpleDisc(Player player) {
         this.player = player;
     }
+    public SimpleDisc() {
+    }
     @Override
     public String getType() {
         return "⬤";
