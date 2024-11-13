@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class GameLogic implements PlayableLogic{
     private final int boardSize= 8;
@@ -8,6 +9,7 @@ public class GameLogic implements PlayableLogic{
     private Player player2;
     private boolean turn=true;
     int countDiscs=4;
+    Stack<Move> history=new Stack<>();
 
 
 
@@ -16,6 +18,7 @@ public class GameLogic implements PlayableLogic{
     @Override
     public boolean locate_disc(Position a, Disc disc) {
         if(ValidMoves().contains(a)){
+            history.add(new Move(a,disc));
             gameBoard[a.col()][a.row()] = disc;
             turn =!turn; // change the current player.
             return true;
@@ -171,6 +174,7 @@ public class GameLogic implements PlayableLogic{
 
     @Override
     public void undoLastMove() {
-
+        Move lastMove = history.pop();
+        gameBoard[lastMove.position().col()][lastMove.position().row()] = null;
     }
 }
