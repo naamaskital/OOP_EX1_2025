@@ -2,7 +2,7 @@ public class BombDisc extends Disc {
 
     public BombDisc(Player player, Position position) {
         this.owner = player;
-        this.POSITION = position;
+        this.position = position;
     }
     public BombDisc(Player player) {
         this.owner = player;
@@ -12,4 +12,6 @@ public class BombDisc extends Disc {
     public String getType() {
         return "💣";
     }
+    public Position getPosition() {return this.position;}
+
 }

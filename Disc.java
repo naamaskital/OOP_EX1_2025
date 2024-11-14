@@ -1,6 +1,6 @@
- abstract class Disc{
+ public abstract class Disc{
     protected Player owner;
-    protected Position POSITION;
+    protected Position position;
     /**
  * Get the player who owns the Disc.
  *

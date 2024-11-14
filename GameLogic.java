@@ -2,35 +2,98 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-public class GameLogic implements PlayableLogic{
-    private final int boardSize= 8;
+public class GameLogic implements PlayableLogic {
+    private final int boardSize = 8;
     public Disc[][] gameBoard = new Disc[boardSize][boardSize];
     private Player player1;
     private Player player2;
-    private boolean turn=true;
-    int countDiscs=4;
-    Stack<Move> history=new Stack<>();
-
-
-
-
+    private boolean turn = true;
+    Stack<Move> history = new Stack<>();
+    List<Position> currentValidMoves = new ArrayList<>();
+    Stack<Stack<Position>> listsOfHistory = new Stack<>();
 
     @Override
     public boolean locate_disc(Position a, Disc disc) {
-        if(ValidMoves().contains(a)){
-            history.add(new Move(a,disc));
-            gameBoard[a.col()][a.row()] = disc;
-            turn =!turn; // change the current player.
+        if (ValidMoves().contains(a)) {
+            Stack<Position> flips = new Stack<>();
+            gameBoard[a.row()][a.col()] = disc;
+            history.push(new Move(a, disc));
+            if(disc instanceof SimpleDisc){flips = flipsForSimple(a);}
+            else if(disc instanceof BombDisc ){flips = flipsForBomb(a);}
+            Stack<Position> temp = new Stack<>();
+            // אם יש דיסקים להפוך
+            while (!flips.isEmpty()) {
+                Position pos = flips.pop(); // שליפת דיסק להפיכה
+                System.out.println(pos);
+                temp.push(pos);
+                gameBoard[pos.row()][pos.col()].setOwner(getCurrentPlayer()); // הפיכת הדיסק
+            }
+            listsOfHistory.push(temp);
+            turn = !turn;
             return true;
+        }
+        return false;
+    }
 
+    private Stack<Position> flipsForBomb(Position a) {
+        Stack<Position> flipNeighbors = new Stack<>();
+        Position[] arrDirections = getArrDiractions();
+        Player player = getCurrentPlayer();
+        for (Position arrDirection : arrDirections) {
+            int xDirection = arrDirection.col();
+            int yDirection = arrDirection.row();
+            int x = a.row() + xDirection, y = a.col() + yDirection;
+            if (x >= 0 && x < boardSize && y >= 0 && y < boardSize) {
+                if (gameBoard[x][y] != null) {
+                    if (!gameBoard[x][y].getOwner().equals(player)) {
+                        flipNeighbors.push(new Position(x, y));
+                    }
+                }
+            }
+        }
+        return flipNeighbors;
+    }
+
+    private Stack<Position> flipsForSimple(Position a) {
+
+        Stack<Position> flippableDiscs = new Stack<>();
+        Stack<Position> temp = new Stack<>();
+        Position[] arrDirections = getArrDiractions();
+        Player player = getCurrentPlayer();
+        for (Position arrDirection : arrDirections) {
+            int xDirection = arrDirection.col();
+            int yDirection = arrDirection.row();
+            for (int x = a.row() + xDirection, y = a.col() + yDirection;
+                 x >= 0 && x < boardSize && y >= 0 && y < boardSize;
+                 x += xDirection, y += yDirection) {
+                if (gameBoard[x][y] == null) {
+                    break;
+                } else if (gameBoard[x][y].getOwner().equals(player)) {
+                    while (!temp.empty()) {
+                        Position p = temp.pop();
+                        flippableDiscs.push(p);
+                    }
+                    break;
+                } else {
+                    temp.push(new Position(x, y));
+                }
+            }
+            temp.clear();
+        }
+        return flippableDiscs;
+    }
+
+    private boolean posissionContains(List<Position> list, Position position) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).equals(position))
+                return true;
         }
         return false;
     }
 
     @Override
-    public Disc getDiscAtPosition(Position position)
-    {
-        return gameBoard[position.col()][position.row()];
+    public Disc getDiscAtPosition(Position position) {
+        return gameBoard[position.row()][position.col()];
     }
 
     @Override
@@ -44,8 +107,10 @@ public class GameLogic implements PlayableLogic{
         List<Position> validMoves = new ArrayList<>();
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
-                if (possibleMove(i, j, player)) {
-                    validMoves.add(new Position(i, j));  // הוספת מיקום חוקי לרשימה
+                if(gameBoard[i][j]==null){
+                    if (possibleMove(i, j, player)) {
+                        validMoves.add(new Position(i, j));  // הוספת מיקום חוקי לרשימה
+                }
                 }
             }
         }
@@ -53,68 +118,67 @@ public class GameLogic implements PlayableLogic{
     }
 
     private boolean possibleMove(int i, int j, Player player) {
-        Position[] arrDirections= getArrDiractions();
-        for (int k=0; k<8; k++) {
+        Position[] arrDirections = getArrDiractions();
+        for (int k = 0; k < 8; k++) {
             if (isGoodDirection(new Position(i, j), arrDirections[k], player)) {
                 return true;  // אם מצאנו כיוון חוקי, מחזירים true
             }
         }
         return false;  // לא מצאנו כיוון חוקי
     }
+
     private Position[] getArrDiractions() {
-        // הכיוונים האפשריים: ימינה, שמאלה, למעלה, למטה וארבעה כיוונים אלכסוניים
         Position[] arrDirections = new Position[8];
-        arrDirections[0] = new Position(1, 1);   // כיוון אלכסון ימינה-למטה
-        arrDirections[1] = new Position(1, 0);   // כיוון ימינה
-        arrDirections[2] = new Position(-1, 0);  // כיוון שמאלה
-        arrDirections[3] = new Position(-1, 1);  // כיוון אלכסון שמאלה-למטה
-        arrDirections[4] = new Position(1, -1);  // כיוון אלכסון ימינה-למעלה
-        arrDirections[5] = new Position(-1, -1); // כיוון אלכסון שמאלה-למעלה
-        arrDirections[6] = new Position(0, 1);   // כיוון למעלה
-        arrDirections[7] = new Position(0, -1);  // כיוון למטה
+        arrDirections[0] = new Position(1, 1);
+        arrDirections[1] = new Position(1, 0);
+        arrDirections[2] = new Position(-1, 0);
+        arrDirections[3] = new Position(-1, 1);
+        arrDirections[4] = new Position(1, -1);
+        arrDirections[5] = new Position(-1, -1);
+        arrDirections[6] = new Position(0, 1);
+        arrDirections[7] = new Position(0, -1);
         return arrDirections;
     }
 
     private boolean isGoodDirection(Position position, Position direction, Player player) {
-        boolean wasOtherPlayer = false;  // דגל לבדוק אם מצאנו דיסק של היריב
-        int xDirection = direction.col();  // כיוון העמודה
-        int yDirection = direction.row();  // כיוון השורה
+        boolean wasOtherPlayer = false;
+        int xDirection = direction.col();
+        int yDirection = direction.row();
 
-        // נבדוק אם ניתן להניח דיסק בכיוון הזה
-        for (int x = position.col() + xDirection, y = position.row() + yDirection;
+        for (int x = position.row() + xDirection, y = position.col() + yDirection;
              x >= 0 && x < boardSize && y >= 0 && y < boardSize;
              x += xDirection, y += yDirection) {
 
             if (gameBoard[x][y] == null) {
-                return false;  // מצאנו מקום פנוי, לא ניתן לשים דיסק כאן
+                return false;
             } else if (gameBoard[x][y].getOwner().equals(player)) {
-                return wasOtherPlayer;  // אם מצאנו דיסק של השחקן אחרי דיסק של היריב
+                return wasOtherPlayer;
             } else {
-                wasOtherPlayer = true;  // מצאנו דיסק של היריב, נמשיך לבדוק
+                wasOtherPlayer = true;
             }
         }
-        return false;  // אם לא מצאנו דיסק של השחקן אחרי דיסק של היריב
+        return false;
     }
 
-
-    public Player getCurrentPlayer(){
+    public Player getCurrentPlayer() {
         Player player;
-        if(turn)
-            player=player1;
+        if (turn)
+            player = player1;
         else
-            player=player2;
+            player = player2;
         return player;
     }
+
     @Override
     public int countFlips(Position a) {
         Position[] arrDirections = getArrDiractions();
-        int otherPlayerCount=0;
+        int otherPlayerCount = 0;
         int count = 0;
         Player player = getCurrentPlayer();
         for (Position arrDirection : arrDirections) {
             int xDirection = arrDirection.col();
             int yDirection = arrDirection.row();
-            for (int x = a.col() + xDirection, y = a.row() + yDirection;
+            for (int x = a.row() + xDirection, y = a.col() + yDirection;
                  x >= 0 && x < boardSize && y >= 0 && y < boardSize;
                  x += xDirection, y += yDirection) {
                 if (gameBoard[x][y] == null) {
@@ -145,7 +209,6 @@ public class GameLogic implements PlayableLogic{
     public void setPlayers(Player player1, Player player2) {
         this.player1 = player1;
         this.player2 = player2;
-
     }
 
     @Override
@@ -160,12 +223,11 @@ public class GameLogic implements PlayableLogic{
 
     @Override
     public void reset() {
-        for (int i = 0; i < gameBoard.length; i++) {
-            for (int j = 0; j < gameBoard[0].length; j++) {
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
                 gameBoard[i][j] = null;
             }
         }
-
         gameBoard[3][3] = new SimpleDisc(player1, new Position(3, 3));
         gameBoard[3][4] = new SimpleDisc(player2, new Position(3, 4));
         gameBoard[4][3] = new SimpleDisc(player2, new Position(4, 3));
@@ -175,6 +237,13 @@ public class GameLogic implements PlayableLogic{
     @Override
     public void undoLastMove() {
         Move lastMove = history.pop();
-        gameBoard[lastMove.position().col()][lastMove.position().row()] = null;
+        gameBoard[lastMove.position().row()][lastMove.position().col()] = null;
+        Stack<Position> lastMoves = listsOfHistory.pop();
+        while(!lastMoves.isEmpty()){
+            Position p = lastMoves.pop();
+            gameBoard[p.row()][p.col()].setOwner(getCurrentPlayer());
+        }
+        turn = !turn;
+
     }
 }

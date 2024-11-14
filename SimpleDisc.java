@@ -2,7 +2,7 @@ public class SimpleDisc extends Disc{
 
     public SimpleDisc(Player player, Position position) {
         this.owner = player;
-        this.POSITION = position;
+        this.position = position;
     }
     public SimpleDisc(Player player) {
         this.owner = player;
@@ -10,5 +10,8 @@ public class SimpleDisc extends Disc{
     @Override
     public String getType() {
         return "⬤";
+    }
+    public Position getPosition() {
+        return this.position;
     }
 }
