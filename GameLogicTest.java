@@ -1,14 +1,16 @@
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import static org.junit.jupiter.api.Assertions.*;
 class GameLogicTest {
     GameLogic gameLogic = new GameLogic();
 
-    Position position1 = new Position(2, 3);
-    Position position2 = new Position(3, 3);
+    Position position1 = new Position(3, 3);
+    Position position2 = new Position(4, 4);
     Player player1;
     Player player2;
 
@@ -20,6 +22,7 @@ class GameLogicTest {
         gameLogic.locate_disc(position1, disc);
         Disc disc1 = new SimpleDisc();
         assertFalse(gameLogic.locate_disc(position1, disc1));
+        assertEquals(player1, gameLogic.getDiscAtPosition(position2).getOwner());
         assertTrue(gameLogic.locate_disc(position2, disc1)); //need to do valid.
     }
 
@@ -28,7 +31,7 @@ class GameLogicTest {
         player1 = new HumanPlayer(true);
         Disc disc = new SimpleDisc(player1, position1);
         gameLogic.locate_disc(position1, disc);
-        assertEquals(disc, gameLogic.getDiscAtPosition(position1));
+        assertEquals(disc.POSITION, gameLogic.getDiscAtPosition(position1));
     }
 
     @Test
@@ -37,6 +40,14 @@ class GameLogicTest {
 
     @Test
     void validMoves() {
+        Disc disc = new SimpleDisc(player1, position1);
+        Disc disc1 = new SimpleDisc(player1, position2);
+        List<Position> validMoves = new ArrayList<>();
+        validMoves.add(position1);
+        validMoves.add(position2);
+
+
+
     }
 
     @Test

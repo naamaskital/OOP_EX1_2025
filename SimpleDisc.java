@@ -1,11 +1,11 @@
 public class SimpleDisc extends Disc{
 
     public SimpleDisc(Player player, Position position) {
-        this.player = player;
+        this.owner = player;
         this.POSITION = position;
     }
     public SimpleDisc(Player player) {
-        this.player = player;
+        this.owner = player;
     }
     public SimpleDisc() {
     }
