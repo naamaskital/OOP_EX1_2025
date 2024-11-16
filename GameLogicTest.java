@@ -31,7 +31,7 @@ class GameLogicTest {
         player1 = new HumanPlayer(true);
         Disc disc = new SimpleDisc(player1, position1);
         gameLogic.locate_disc(position1, disc);
-        assertEquals(disc.POSITION, gameLogic.getDiscAtPosition(position1));
+        assertEquals(disc.position, gameLogic.getDiscAtPosition(position1));
     }
 
     @Test

@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class GameLogic implements PlayableLogic {
     private final int boardSize = 8;
@@ -9,26 +7,64 @@ public class GameLogic implements PlayableLogic {
     private Player player2;
     private boolean turn = true;
     Stack<Move> history = new Stack<>();
-    List<Position> currentValidMoves = new ArrayList<>();
+    Stack<Stack<Position>> listsOfHistory = new Stack<>();
+    Stack<Position> flipNeighbors = new Stack<>();
+
 
     @Override
     public boolean locate_disc(Position a, Disc disc) {
         if (ValidMoves().contains(a)) {
-            gameBoard[a.row()][a.col()] = disc;  // תיקון מיקום row ו-col
+            Stack<Position> flips = new Stack<>();
+            gameBoard[a.row()][a.col()] = disc;
             history.push(new Move(a, disc));
-            Stack<Position> flips = flipsForSimple(a);
+            if(disc instanceof SimpleDisc){flips = flipsForSimple(a);}
+            else if(disc instanceof BombDisc ){flips = flipsForBomb(a,flipNeighbors);}
+            Stack<Position> temp = new Stack<>();
             // אם יש דיסקים להפוך
             while (!flips.isEmpty()) {
                 Position pos = flips.pop(); // שליפת דיסק להפיכה
+                System.out.println(pos);
+                temp.push(pos);
                 gameBoard[pos.row()][pos.col()].setOwner(getCurrentPlayer()); // הפיכת הדיסק
             }
+            listsOfHistory.push(temp);
             turn = !turn;
             return true;
         }
         return false;
     }
 
+    private Stack<Position> flipsForBomb(Position a, Stack flipNeighbors) {
+        Position[] arrDirections = getArrDiractions();
+        Player player = getCurrentPlayer();
+
+
+        for (Position arrDirection : arrDirections) {
+            int xDirection = arrDirection.col();
+            int yDirection = arrDirection.row();
+            int x = a.row() + xDirection, y = a.col() + yDirection;
+            if (x >= 0 && x < boardSize && y >= 0 && y < boardSize) {
+                if (gameBoard[x][y] != null) {
+                    Position current = new Position(x, y);
+
+                    if (flipNeighbors.contains(current)) {
+                        continue;
+                    }
+                    if (!gameBoard[x][y].getOwner().equals(player) ) {
+                        flipNeighbors.push(new Position(x, y));
+                    }
+                    if (gameBoard[x][y].getType() == "💣") {
+                        flipsForBomb(new Position(x,y),flipNeighbors);
+                    }
+                }
+            }
+        }
+
+    return flipNeighbors;
+}
+
     private Stack<Position> flipsForSimple(Position a) {
+
         Stack<Position> flippableDiscs = new Stack<>();
         Stack<Position> temp = new Stack<>();
         Position[] arrDirections = getArrDiractions();
@@ -36,7 +72,7 @@ public class GameLogic implements PlayableLogic {
         for (Position arrDirection : arrDirections) {
             int xDirection = arrDirection.col();
             int yDirection = arrDirection.row();
-            for (int x = a.row() + xDirection, y = a.col() + yDirection;  // תיקון סדר row ו-col
+            for (int x = a.row() + xDirection, y = a.col() + yDirection;
                  x >= 0 && x < boardSize && y >= 0 && y < boardSize;
                  x += xDirection, y += yDirection) {
                 if (gameBoard[x][y] == null) {
@@ -66,7 +102,7 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public Disc getDiscAtPosition(Position position) {
-        return gameBoard[position.row()][position.col()];  // תיקון row ו-col
+        return gameBoard[position.row()][position.col()];
     }
 
     @Override
@@ -80,12 +116,13 @@ public class GameLogic implements PlayableLogic {
         List<Position> validMoves = new ArrayList<>();
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
-                if (possibleMove(i, j, player)) {
-                    validMoves.add(new Position(i, j));  // הוספת מיקום חוקי לרשימה
+                if(gameBoard[i][j]==null){
+                    if (possibleMove(i, j, player)) {
+                        validMoves.add(new Position(i, j));  // הוספת מיקום חוקי לרשימה
+                }
                 }
             }
         }
-        System.out.println(validMoves);
         return validMoves;
     }
 
@@ -117,7 +154,7 @@ public class GameLogic implements PlayableLogic {
         int xDirection = direction.col();
         int yDirection = direction.row();
 
-        for (int x = position.row() + xDirection, y = position.col() + yDirection;  // תיקון row ו-col
+        for (int x = position.row() + xDirection, y = position.col() + yDirection;
              x >= 0 && x < boardSize && y >= 0 && y < boardSize;
              x += xDirection, y += yDirection) {
 
@@ -150,7 +187,7 @@ public class GameLogic implements PlayableLogic {
         for (Position arrDirection : arrDirections) {
             int xDirection = arrDirection.col();
             int yDirection = arrDirection.row();
-            for (int x = a.row() + xDirection, y = a.col() + yDirection;  // תיקון row ו-col
+            for (int x = a.row() + xDirection, y = a.col() + yDirection;
                  x >= 0 && x < boardSize && y >= 0 && y < boardSize;
                  x += xDirection, y += yDirection) {
                 if (gameBoard[x][y] == null) {
@@ -209,6 +246,13 @@ public class GameLogic implements PlayableLogic {
     @Override
     public void undoLastMove() {
         Move lastMove = history.pop();
-        gameBoard[lastMove.position().row()][lastMove.position().col()] = null;  // תיקון row ו-col
+        gameBoard[lastMove.position().row()][lastMove.position().col()] = null;
+        Stack<Position> lastMoves = listsOfHistory.pop();
+        while(!lastMoves.isEmpty()){
+            Position p = lastMoves.pop();
+            gameBoard[p.row()][p.col()].setOwner(getCurrentPlayer());
+        }
+        turn = !turn;
+
     }
 }

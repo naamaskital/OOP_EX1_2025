@@ -21,7 +21,7 @@ public class Position {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Position position = (Position) obj;
-        return col == position.col && row == position.row;
+        return   row == position.row && col == position.col;
     }
 
 }
