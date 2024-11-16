@@ -11,6 +11,7 @@ public class GameLogic implements PlayableLogic {
     Stack<Position> flipNeighbors = new Stack<>();
 
 
+
     @Override
     public boolean locate_disc(Position a, Disc disc) {
         if (ValidMoves().contains(a)) {
