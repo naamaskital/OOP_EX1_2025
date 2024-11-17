@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class GameLogic implements PlayableLogic {
-    private final int boardSize = 5;
+    private final int boardSize = 8;
     public Disc[][] gameBoard = new Disc[boardSize][boardSize];
     private Player player1;
     private Player player2;
@@ -25,8 +25,12 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public boolean locate_disc(Position a, Disc disc) {
+        String str;
+        Player player=getCurrentPlayer();
+        if(player.equals(player1))
+            str="Player 1";
+        else str="Player 2";
         if (ValidMoves().contains(a)) {
-            Player player=getCurrentPlayer();
             if(disc instanceof BombDisc) {
                 if(player.getNumber_of_bombs()==0)
                     return false;
@@ -40,6 +44,7 @@ public class GameLogic implements PlayableLogic {
             }
             Stack<Position> flips = new Stack<>();
             gameBoard[a.row()][a.col()] = disc;
+            System.out.println(str+" placed a "+disc.getType()+" in "+a.toString() );
             history.push(new Move(a, disc));
             if(disc instanceof BombDisc){flips = flipsForBomb(a,flipNeighbors);}
             else {flips = flipsForSimple(a);}
@@ -47,9 +52,10 @@ public class GameLogic implements PlayableLogic {
             // אם יש דיסקים להפוך
             while (!flips.isEmpty()) {
                 Position pos = flips.pop(); // שליפת דיסק להפיכה
-                System.out.println(pos);
                 temp.push(pos);
-                gameBoard[pos.row()][pos.col()].setOwner(getCurrentPlayer()); // הפיכת הדיסק
+                Disc currentDisc=gameBoard[pos.row()][pos.col()];
+                currentDisc.setOwner(getCurrentPlayer());
+                System.out.println(str+" flipped the "+currentDisc.getType()+" in "+pos.toString() );
             }
             listsOfHistory.push(temp);
             turn = !turn;
@@ -294,12 +300,20 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public void undoLastMove() {
+        System.out.println("Undoing last move:");
+        if(history.empty()) {
+            System.out.println("\tNo previous move available to undo");
+            return;
+        }
         Move lastMove = history.pop();
+        Disc disc=gameBoard[lastMove.position().row()][lastMove.position().col()];
+        System.out.println("\tUndo: removing "+disc.getType()+" from "+lastMove.position().toString());
         gameBoard[lastMove.position().row()][lastMove.position().col()] = null;
         Stack<Position> lastMoves = listsOfHistory.pop();
         while(!lastMoves.isEmpty()){
             Position p = lastMoves.pop();
             gameBoard[p.row()][p.col()].setOwner(getCurrentPlayer());
+            System.out.println("\tUndo: flipping back "+disc.getType()+" in "+p.toString());
         }
         turn = !turn;
 
