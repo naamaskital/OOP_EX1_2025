@@ -26,6 +26,18 @@ public class GameLogic implements PlayableLogic {
     @Override
     public boolean locate_disc(Position a, Disc disc) {
         if (ValidMoves().contains(a)) {
+            Player player=getCurrentPlayer();
+            if(disc instanceof BombDisc) {
+                if(player.getNumber_of_bombs()==0)
+                    return false;
+                else
+                    player.reduce_bomb();
+            }
+            if(disc instanceof UnflippableDisc) {
+                if(player.getNumber_of_unflippedable()==0) return false;
+                else
+                    player.reduce_unflippedable();
+            }
             Stack<Position> flips = new Stack<>();
             gameBoard[a.row()][a.col()] = disc;
             history.push(new Move(a, disc));
@@ -245,6 +257,8 @@ public class GameLogic implements PlayableLogic {
         gameBoard[4][3] = new SimpleDisc(player2, new Position(4, 3));
         gameBoard[4][4] = new SimpleDisc(player1, new Position(4, 4));
         turn=true;
+        player1.reset_bombs_and_unflippedable();
+        player2.reset_bombs_and_unflippedable();
     }
 
     @Override
