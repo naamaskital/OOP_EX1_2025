@@ -9,6 +9,17 @@ public class GameLogic implements PlayableLogic {
     Stack<Move> history = new Stack<>();
     Stack<Stack<Position>> listsOfHistory = new Stack<>();
     Stack<Position> flipNeighbors = new Stack<>();
+    Position[] arrDirections = new Position[8];
+    {
+        arrDirections[0] = new Position(1, 1);
+        arrDirections[1] = new Position(1, 0);
+        arrDirections[2] = new Position(-1, 0);
+        arrDirections[3] = new Position(-1, 1);
+        arrDirections[4] = new Position(1, -1);
+        arrDirections[5] = new Position(-1, -1);
+        arrDirections[6] = new Position(0, 1);
+        arrDirections[7] = new Position(0, -1);
+    }
 
 
 
@@ -18,8 +29,8 @@ public class GameLogic implements PlayableLogic {
             Stack<Position> flips = new Stack<>();
             gameBoard[a.row()][a.col()] = disc;
             history.push(new Move(a, disc));
-            if(disc instanceof SimpleDisc){flips = flipsForSimple(a);}
-            else if(disc instanceof BombDisc ){flips = flipsForBomb(a,flipNeighbors);}
+            if(disc instanceof BombDisc){flips = flipsForBomb(a,flipNeighbors);}
+            else {flips = flipsForSimple(a);}
             Stack<Position> temp = new Stack<>();
             // אם יש דיסקים להפוך
             while (!flips.isEmpty()) {
@@ -36,7 +47,6 @@ public class GameLogic implements PlayableLogic {
     }
 
     private Stack<Position> flipsForBomb(Position a, Stack flipNeighbors) {
-        Position[] arrDirections = getArrDiractions();
         Player player = getCurrentPlayer();
 
 
@@ -68,7 +78,6 @@ public class GameLogic implements PlayableLogic {
 
         Stack<Position> flippableDiscs = new Stack<>();
         Stack<Position> temp = new Stack<>();
-        Position[] arrDirections = getArrDiractions();
         Player player = getCurrentPlayer();
         for (Position arrDirection : arrDirections) {
             int xDirection = arrDirection.col();
@@ -128,7 +137,6 @@ public class GameLogic implements PlayableLogic {
     }
 
     private boolean possibleMove(int i, int j, Player player) {
-        Position[] arrDirections = getArrDiractions();
         for (int k = 0; k < 8; k++) {
             if (isGoodDirection(new Position(i, j), arrDirections[k], player)) {
                 return true;  // אם מצאנו כיוון חוקי, מחזירים true
@@ -137,18 +145,7 @@ public class GameLogic implements PlayableLogic {
         return false;  // לא מצאנו כיוון חוקי
     }
 
-    private Position[] getArrDiractions() {
-        Position[] arrDirections = new Position[8];
-        arrDirections[0] = new Position(1, 1);
-        arrDirections[1] = new Position(1, 0);
-        arrDirections[2] = new Position(-1, 0);
-        arrDirections[3] = new Position(-1, 1);
-        arrDirections[4] = new Position(1, -1);
-        arrDirections[5] = new Position(-1, -1);
-        arrDirections[6] = new Position(0, 1);
-        arrDirections[7] = new Position(0, -1);
-        return arrDirections;
-    }
+
 
     private boolean isGoodDirection(Position position, Position direction, Player player) {
         boolean wasOtherPlayer = false;
@@ -158,13 +155,16 @@ public class GameLogic implements PlayableLogic {
         for (int x = position.row() + xDirection, y = position.col() + yDirection;
              x >= 0 && x < boardSize && y >= 0 && y < boardSize;
              x += xDirection, y += yDirection) {
+            Disc disc=gameBoard[x][y];
 
-            if (gameBoard[x][y] == null) {
+            if (disc == null) {
                 return false;
-            } else if (gameBoard[x][y].getOwner().equals(player)) {
+            } else if (disc.getOwner().equals(player)) {
                 return wasOtherPlayer;
             } else {
-                wasOtherPlayer = true;
+                if(!(disc instanceof UnflippableDisc)  ){
+                    wasOtherPlayer = true;
+                }
             }
         }
         return false;
@@ -181,7 +181,6 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public int countFlips(Position a) {
-        Position[] arrDirections = getArrDiractions();
         int otherPlayerCount = 0;
         int count = 0;
         Player player = getCurrentPlayer();
@@ -191,13 +190,16 @@ public class GameLogic implements PlayableLogic {
             for (int x = a.row() + xDirection, y = a.col() + yDirection;
                  x >= 0 && x < boardSize && y >= 0 && y < boardSize;
                  x += xDirection, y += yDirection) {
-                if (gameBoard[x][y] == null) {
+                Disc disc=gameBoard[x][y];
+                if (disc == null) {
                     break;
-                } else if (gameBoard[x][y].getOwner().equals(player)) {
+                } else if (disc.getOwner().equals(player)) {
                     count += otherPlayerCount;
                     break;
                 } else {
-                    otherPlayerCount++;
+                    if(!(disc instanceof UnflippableDisc)){
+                        otherPlayerCount++;
+                    }
                 }
             }
             otherPlayerCount = 0;
@@ -242,6 +244,7 @@ public class GameLogic implements PlayableLogic {
         gameBoard[3][4] = new SimpleDisc(player2, new Position(3, 4));
         gameBoard[4][3] = new SimpleDisc(player2, new Position(4, 3));
         gameBoard[4][4] = new SimpleDisc(player1, new Position(4, 4));
+        turn=true;
     }
 
     @Override

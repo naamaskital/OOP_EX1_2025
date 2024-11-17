@@ -1,4 +1,5 @@
 public class HumanPlayer extends Player{
+
     public HumanPlayer(boolean isPlayerOne ) {
         super(isPlayerOne);
     }
@@ -8,5 +9,5 @@ public class HumanPlayer extends Player{
         return true;
     }
 
-
+ 
 }
