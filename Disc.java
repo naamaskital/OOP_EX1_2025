@@ -1,6 +1,9 @@
  public abstract class Disc{
     protected Player owner;
-    protected Position position;
+
+    public Disc(Player p){
+        owner = p;
+    }
     /**
  * Get the player who owns the Disc.
  *

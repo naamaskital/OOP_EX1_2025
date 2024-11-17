@@ -1,19 +1,10 @@
 public class SimpleDisc extends Disc{
 
-    public SimpleDisc(Player player, Position position) {
-        this.owner = player;
-        this.position = position;
-    }
-    public SimpleDisc(Player player) {
-        this.owner = player;
-    }
-    public SimpleDisc() {
+    public SimpleDisc(Player player){
+        super(player);
     }
     @Override
     public String getType() {
         return "⬤";
-    }
-    public Position getPosition() {
-        return this.position;
     }
 }

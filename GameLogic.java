@@ -6,10 +6,8 @@ public class GameLogic implements PlayableLogic {
     private Player player1;
     private Player player2;
     private boolean turn = true;
-    Stack<Move> history = new Stack<>();
-    Stack<Stack<Position>> listsOfHistory = new Stack<>();
-    Stack<Position> flipNeighbors = new Stack<>();
     Position[] arrDirections = new Position[8];
+    Stack<Move> historyMoves = new Stack<>();
     {
         arrDirections[0] = new Position(1, 1);
         arrDirections[1] = new Position(1, 0);
@@ -45,8 +43,7 @@ public class GameLogic implements PlayableLogic {
             Stack<Position> flips = new Stack<>();
             gameBoard[a.row()][a.col()] = disc;
             System.out.println(str+" placed a "+disc.getType()+" in "+a.toString() );
-            history.push(new Move(a, disc));
-            if(disc instanceof BombDisc){flips = flipsForBomb(a,flipNeighbors);}
+            if(disc instanceof BombDisc){flips = flipsForBomb(a,new Stack<Position>());}
             else {flips = flipsForSimple(a);}
             Stack<Position> temp = new Stack<>();
             // אם יש דיסקים להפוך
@@ -57,14 +54,15 @@ public class GameLogic implements PlayableLogic {
                 currentDisc.setOwner(getCurrentPlayer());
                 System.out.println(str+" flipped the "+currentDisc.getType()+" in "+pos.toString() );
             }
-            listsOfHistory.push(temp);
+            Move move=new Move(disc,a,temp);
+            historyMoves.push(move);
             turn = !turn;
             return true;
         }
         return false;
     }
 
-    private Stack<Position> flipsForBomb(Position a, Stack flipNeighbors) {
+    private Stack<Position> flipsForBomb(Position a, Stack<Position> flipNeighbors) {
         Player player = getCurrentPlayer();
 
 
@@ -83,7 +81,7 @@ public class GameLogic implements PlayableLogic {
                         flipNeighbors.push(new Position(x, y));
                     }
                     if (gameBoard[x][y].getType() == "💣") {
-                        flipsForBomb(new Position(x,y),flipNeighbors);
+                        flipsForBomb(new Position(x,y),flipNeighbors );
                     }
                 }
             }
@@ -289,10 +287,10 @@ public class GameLogic implements PlayableLogic {
                 gameBoard[i][j] = null;
             }
         }
-        gameBoard[3][3] = new SimpleDisc(player1, new Position(3, 3));
-        gameBoard[3][4] = new SimpleDisc(player2, new Position(3, 4));
-        gameBoard[4][3] = new SimpleDisc(player2, new Position(4, 3));
-        gameBoard[4][4] = new SimpleDisc(player1, new Position(4, 4));
+        gameBoard[3][3] = new SimpleDisc(player1);
+        gameBoard[3][4] = new SimpleDisc(player2);
+        gameBoard[4][3] = new SimpleDisc(player2);
+        gameBoard[4][4] = new SimpleDisc(player1);
         turn=true;
         player1.reset_bombs_and_unflippedable();
         player2.reset_bombs_and_unflippedable();
@@ -301,17 +299,18 @@ public class GameLogic implements PlayableLogic {
     @Override
     public void undoLastMove() {
         System.out.println("Undoing last move:");
-        if(history.empty()) {
+        if(historyMoves.empty()) {
             System.out.println("\tNo previous move available to undo");
             return;
         }
-        Move lastMove = history.pop();
-        Disc disc=gameBoard[lastMove.position().row()][lastMove.position().col()];
-        System.out.println("\tUndo: removing "+disc.getType()+" from "+lastMove.position().toString());
+        Move lastMove = historyMoves.pop();
+        Disc disc= lastMove.disc();
+        Position position= lastMove.position();
+        System.out.println("\tUndo: removing "+disc.getType()+" from "+position.toString());
         gameBoard[lastMove.position().row()][lastMove.position().col()] = null;
-        Stack<Position> lastMoves = listsOfHistory.pop();
-        while(!lastMoves.isEmpty()){
-            Position p = lastMoves.pop();
+        Stack<Position> historyFlips = lastMove.getFlips();
+        while(!historyFlips.isEmpty()){
+            Position p = historyFlips.pop();
             gameBoard[p.row()][p.col()].setOwner(getCurrentPlayer());
             System.out.println("\tUndo: flipping back "+disc.getType()+" in "+p.toString());
         }
