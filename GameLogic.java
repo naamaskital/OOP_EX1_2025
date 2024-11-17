@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class GameLogic implements PlayableLogic {
-    private final int boardSize = 8;
+    private final int boardSize = 5;
     public Disc[][] gameBoard = new Disc[boardSize][boardSize];
     private Player player1;
     private Player player2;
@@ -242,7 +242,38 @@ public class GameLogic implements PlayableLogic {
 
     @Override
     public boolean isGameFinished() {
-        return ValidMoves().isEmpty();
+        if(ValidMoves().isEmpty()){
+            int winner=getWinner();
+            if(winner==1)
+                player1.addWin();
+            else if(winner==2)
+                player2.addWin();
+            return true;
+        }
+        return false;
+    }
+
+    private int getWinner() {
+        int count1=0;
+        int count2=0;
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                Disc disc=gameBoard[i][j];
+                if(disc != null){
+                    if(gameBoard[i][j].getOwner().equals(player1)) {
+                        count1++;
+                    }
+                    else if(gameBoard[i][j].getOwner().equals(player2)) {
+                        count2++;
+                    }
+                }
+            }
+        }
+        if(count1>count2) return 1;
+        else if (count2>count1) {
+            return 2;
+        }
+        return 0;
     }
 
     @Override
