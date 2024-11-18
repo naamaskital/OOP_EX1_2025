@@ -11,7 +11,6 @@ public abstract class Player {
         reset_bombs_and_unflippedable();
         wins = 0;
     }
-
     /**
      * Determines whether this player is Player 1.
      *
@@ -60,5 +59,7 @@ public abstract class Player {
         this.number_of_bombs = initial_number_of_bombs;
         this.number_of_unflippedable = initial_number_of_unflippedable;
     }
+    public void increase_unflippedable() {number_of_unflippedable++;}
+    public void increase_bomb() {number_of_bombs++;}
 
 }
