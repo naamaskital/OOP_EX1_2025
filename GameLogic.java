@@ -56,11 +56,7 @@ public class GameLogic implements PlayableLogic {
             System.out.println(str + " placed a " + disc.getType() + " in " + a.toString());
 
             // Determine if any discs need to be flipped
-            if (disc instanceof BombDisc) {
-                flips = flipsForBomb(a, new Stack<Position>());
-            } else {
-                flips = flipsForSimple(a);
-            }
+            flips = flipsForSimple(a);
 
             Stack<Position> temp = new Stack<>();
 
@@ -68,6 +64,9 @@ public class GameLogic implements PlayableLogic {
             while (!flips.isEmpty()) {
                 Position pos = flips.pop();  // Remove position to flip
                 temp.push(pos);
+                if(gameBoard[pos.row()][pos.col()] instanceof BombDisc){
+                    flipsForBomb(pos,new Stack<Position>());
+                }
                 Disc currentDisc = gameBoard[pos.row()][pos.col()];
                 currentDisc.setOwner(getCurrentPlayer());  // Change ownership
                 System.out.println(str + " flipped the " + currentDisc.getType() + " in " + pos.toString());
@@ -83,9 +82,8 @@ public class GameLogic implements PlayableLogic {
     }
 
     // Helper method to determine flips caused by a bomb disc
-    private Stack<Position> flipsForBomb(Position a, Stack<Position> flipNeighbors) {
+    private void flipsForBomb(Position a, Stack<Position> flipNeighbors) {
         Player player = getCurrentPlayer();
-
         // Iterate over all 8 possible directions
         for (Position arrDirection : arrDirections) {
             int xDirection = arrDirection.col();
@@ -114,7 +112,11 @@ public class GameLogic implements PlayableLogic {
                 }
             }
         }
-        return flipNeighbors;
+        while(!flipNeighbors.isEmpty()) {
+            Position current = flipNeighbors.pop();
+            Disc disc=gameBoard[current.row()][current.col()];
+            disc.setOwner(player);
+        }
     }
 
     // Helper method to find simple flips (non-bomb)
