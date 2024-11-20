@@ -125,9 +125,6 @@ public class GameLogic implements PlayableLogic {
         }
     }
 
-    private void flipForBombs(){
-
-    }
 
     // Helper method to find simple flips (non-bomb)
     private Stack<Position> flipsForSimple(Position a) {
@@ -246,8 +243,36 @@ public class GameLogic implements PlayableLogic {
         return player;
     }
 
-    // Count the number of discs that would be flipped if a disc is placed at position a
-    @Override
+//    // Count the number of discs that would be flipped if a disc is placed at position a
+//    @Override
+//    public int countFlips(Position a) {
+//        int otherPlayerCount = 0;
+//        int count = 0;
+//        Player player = getCurrentPlayer();
+//
+//        // Check each direction for potential flips
+//        for (Position arrDirection : arrDirections) {
+//            int xDirection = arrDirection.col();
+//            int yDirection = arrDirection.row();
+//            for (int x = a.row() + xDirection, y = a.col() + yDirection;
+//                 x >= 0 && x < boardSize && y >= 0 && y < boardSize;
+//                 x += xDirection, y += yDirection) {
+//                Disc disc = gameBoard[x][y];
+//                if (disc == null) {
+//                    break;
+//                } else if (disc.getOwner().equals(player)) {
+//                    count += otherPlayerCount;
+//                    break;
+//                } else {
+//                    if (!(disc instanceof UnflippableDisc)) {
+//                        otherPlayerCount++;
+//                    }
+//                }
+//            }
+//            otherPlayerCount = 0;
+//        }
+//        return count;
+//    }
     public int countFlips(Position a) {
         int otherPlayerCount = 0;
         int count = 0;
