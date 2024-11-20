@@ -150,8 +150,6 @@ public class GameLogic implements PlayableLogic {
     }
 
 
-<<<<<<< HEAD
-=======
     // Helper method to find simple flips (non-bomb)
     private Stack<Position> flipsForSimple(Position a) {
         Stack<Position> flippableDiscs = new Stack<>();
@@ -193,7 +191,6 @@ public class GameLogic implements PlayableLogic {
         }
         return false;
     }
->>>>>>> 26676d28d300dcd195a6dbb84eb72fa855bfd76b
 
     // Return the disc at a specific position on the board
     @Override
