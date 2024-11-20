@@ -1,34 +1,73 @@
 import java.util.List;
 import java.util.Random;
 
-public class RandomAI extends AIPlayer{
+public class RandomAI extends AIPlayer {
+
+    private Random random;
 
     public RandomAI(boolean isPlayerOne) {
         super(isPlayerOne);
+        this.random = new Random();
     }
 
     @Override
     public Move makeMove(PlayableLogic gameStatus) {
-        if(gameStatus instanceof GameLogic){
+        if (gameStatus instanceof GameLogic) {
             GameLogic gameLogic = (GameLogic) gameStatus;
-            List<Position> possibleOptions=gameLogic.ValidMoves();
-            Random random = new Random();
-            int kind = random.nextInt(3);
-            int location= random.nextInt(possibleOptions.size());
-            Disc disc;
-            Move move;
-            if(kind==0){
-                disc=new SimpleDisc(gameLogic.getCurrentPlayer());
+            List<Position> possibleOptions = gameLogic.ValidMoves();
+            Player player = gameLogic.getCurrentPlayer();
+
+            if (possibleOptions.isEmpty()) {
+                return null;  // No valid moves available, return null or some default behavior.
             }
-            else if(kind==1){
-                disc=new UnflippableDisc(gameLogic.getCurrentPlayer());
-            }
-            else{
-                disc=new BombDisc(gameLogic.getCurrentPlayer());
-            }
-            move=new Move(disc,possibleOptions.get(location),null);
-            return move;
+
+            boolean hasBombs = player.getNumber_of_bombs() > 0;
+            boolean hasUnflip = player.getNumber_of_unflippedable() > 0;
+
+            // Randomly select a position from the available options.
+            int location = random.nextInt(possibleOptions.size());
+            Position selectedPosition = possibleOptions.get(location);
+
+            // Determine the type of disc to play based on available resources.
+            Disc disc = createRandomDisc(gameLogic, hasBombs, hasUnflip);
+
+            // Create and return the move.
+            return new Move(disc, selectedPosition, null);
         }
+
         return null;
     }
+
+    // Helper method to create a random disc type based on player resources.
+    private Disc createRandomDisc(GameLogic gameLogic, boolean hasBombs, boolean hasUnflip) {
+        Disc disc;
+
+        if (!(hasBombs || hasUnflip)) {
+            // Only SimpleDisc is available when no bombs or unflippable discs are available.
+            disc = new SimpleDisc(gameLogic.getCurrentPlayer());
+        } else {
+            int kind;
+            if (hasBombs && hasUnflip) {
+                // Randomly choose between Simple, Bomb, or Unflippable disc.
+                kind = random.nextInt(3);
+            } else {
+                // Choose between Simple and one of the available discs.
+                kind = random.nextInt(2);
+            }
+
+            switch (kind) {
+                case 0:
+                    disc = new SimpleDisc(gameLogic.getCurrentPlayer());
+                    break;
+                case 1:
+                    disc = hasBombs ? new BombDisc(gameLogic.getCurrentPlayer()) : new UnflippableDisc(gameLogic.getCurrentPlayer());
+                    break;
+                default:
+                    disc = new BombDisc(gameLogic.getCurrentPlayer());
+                    break;
+            }
+        }
+        return disc;
+    }
 }
+

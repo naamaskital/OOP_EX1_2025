@@ -60,12 +60,14 @@ public class GameLogic implements PlayableLogic {
 
             Stack<Position> temp = new Stack<>();
 
+
             // Flip the necessary discs
             while (!flips.isEmpty()) {
                 Position pos = flips.pop();  // Remove position to flip
                 temp.push(pos);
                 if(gameBoard[pos.row()][pos.col()] instanceof BombDisc){
-                    flipsForBomb(pos,new Stack<Position>());
+                    Set<Disc> setFlip = new HashSet<>();
+                    flipsForBomb(pos,new Stack<Position>(),setFlip);
                 }
                 Disc currentDisc = gameBoard[pos.row()][pos.col()];
                 currentDisc.setOwner(getCurrentPlayer());  // Change ownership
@@ -82,32 +84,33 @@ public class GameLogic implements PlayableLogic {
     }
 
     // Helper method to determine flips caused by a bomb disc
-    private void flipsForBomb(Position a, Stack<Position> flipNeighbors) {
+    private void flipsForBomb(Position bomb, Stack<Position> flipNeighbors, Set<Disc> setFlip) {
+        setFlip.add(gameBoard[bomb.row()][bomb.col()]);
         Player player = getCurrentPlayer();
         // Iterate over all 8 possible directions
         for (Position arrDirection : arrDirections) {
             int xDirection = arrDirection.col();
             int yDirection = arrDirection.row();
-            int x = a.row() + xDirection, y = a.col() + yDirection;
+            int x = bomb.row() + xDirection, y = bomb.col() + yDirection;
 
             // Check bounds and if there's a disc to flip
             if (x >= 0 && x < boardSize && y >= 0 && y < boardSize) {
                 if (gameBoard[x][y] != null) {
+                    Disc disc = gameBoard[x][y];
                     Position current = new Position(x, y);
-
                     // Avoid duplicate positions in the flip list
                     if (flipNeighbors.contains(current)) {
                         continue;
                     }
 
                     // Check if the disc is owned by the opponent and add it to flip list
-                    if (!gameBoard[x][y].getOwner().equals(player)) {
+                    if (!disc.getOwner().equals(player)) {
                         flipNeighbors.push(new Position(x, y));
                     }
 
                     // If it's a bomb, recurse to check surrounding discs
-                    if (gameBoard[x][y].getType() == "💣") {
-                        flipsForBomb(new Position(x, y), flipNeighbors);
+                    if (disc instanceof  BombDisc) {
+                        if(setFlip.contains(disc)) flipsForBomb(new Position(x, y), flipNeighbors,setFlip);
                     }
                 }
             }
@@ -115,8 +118,15 @@ public class GameLogic implements PlayableLogic {
         while(!flipNeighbors.isEmpty()) {
             Position current = flipNeighbors.pop();
             Disc disc=gameBoard[current.row()][current.col()];
-            disc.setOwner(player);
+            if (disc != null) {
+                disc.setOwner(player);
+            }
+
         }
+    }
+
+    private void flipForBombs(){
+
     }
 
     // Helper method to find simple flips (non-bomb)
@@ -384,3 +394,4 @@ public class GameLogic implements PlayableLogic {
         turn = !turn;  // Switch player turn
     }
 }
+
