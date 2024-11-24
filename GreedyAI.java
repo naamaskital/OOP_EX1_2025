@@ -37,9 +37,6 @@ public class GreedyAI extends AIPlayer{
         }
         else{
             Collections.sort(sameCount,new MaxRelevantComparator());
-            for (int i = 0; i < sameCount.size(); i++) {
-                System.out.println(sameCount.get(i));
-            }
             return new Move(disc,sameCount.get(sameCount.size()-1),null);
         }
     }
