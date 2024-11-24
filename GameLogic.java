@@ -54,7 +54,7 @@ public class GameLogic implements PlayableLogic {
             gameBoard[a.row()][a.col()] = disc;  // Place the disc on the board
             System.out.println(str + " placed a " + disc.getType() + " in " + a.toString());
             List<Position> historyCurrent=new Stack<>();
-            Set<Disc> flips=flipsForLocation(a,historyCurrent);
+            flipsForLocation(a,historyCurrent,new HashSet<Disc>());
             Stack<Position> history=new Stack<>();
             for (Position pos : historyCurrent) {
                 history.add(pos);
@@ -70,8 +70,7 @@ public class GameLogic implements PlayableLogic {
         }
         return false;
     }
-    private Set<Disc> flipsForLocation(Position pos,List<Position> history) {
-        Set<Disc> setFlip = new HashSet<>();
+    private void flipsForLocation(Position pos,List<Position> history, HashSet<Disc> setFlip) {
         Player player = getCurrentPlayer();
         Stack<Disc> temp = new Stack<>();
         Stack<Position> tempHistory = new Stack<>();
@@ -110,7 +109,6 @@ public class GameLogic implements PlayableLogic {
             }
             temp.clear();
         }
-        return setFlip;
     }
     private void addFlipsForBomb(Position bomb, Set<Disc> setFlip,List<Position> history) {
         Player player= getCurrentPlayer();
@@ -225,7 +223,8 @@ public class GameLogic implements PlayableLogic {
     }
 
     public int countFlips(Position a) {
-        Set<Disc> flips= flipsForLocation(a,new Stack<Position>());
+        HashSet<Disc> flips= new HashSet<>();
+        flipsForLocation(a,new Stack<Position>(),flips);
         return flips.size();
     }
 
