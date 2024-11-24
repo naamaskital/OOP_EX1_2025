@@ -3,12 +3,11 @@ import java.util.Random;
 
 public class RandomAI extends AIPlayer {
 
-    private Random random;
+    private static Random random=new Random();
 
     public RandomAI(boolean isPlayerOne) {
         super(isPlayerOne);
-        this.random = new Random();
-    }
+      }
 
     @Override
     public Move makeMove(PlayableLogic gameStatus) {
@@ -39,7 +38,7 @@ public class RandomAI extends AIPlayer {
     }
 
     // Helper method to create a random disc type based on player resources.
-    private Disc createRandomDisc(GameLogic gameLogic, boolean hasBombs, boolean hasUnflip) {
+    private static Disc createRandomDisc(GameLogic gameLogic, boolean hasBombs, boolean hasUnflip) {
         Disc disc;
 
         if (!(hasBombs || hasUnflip)) {
