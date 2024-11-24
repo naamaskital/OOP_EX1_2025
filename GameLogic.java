@@ -11,17 +11,14 @@ public class GameLogic implements PlayableLogic {
     private boolean onlyHumen;
     
     {
-
-        arrDirections[0] = new Position(0, 1);
-        arrDirections[1] = new Position(1, 0);
-        arrDirections[2] = new Position(0, -1);
-        arrDirections[3] = new Position(-1, -1);
-        arrDirections[4] = new Position(-1, 1);
-        arrDirections[5] = new Position(1, 1);
-        arrDirections[6] = new Position(1, -1);
-        arrDirections[7] = new Position(-1, 0);
-
-
+        arrDirections[0] = new Position(1, 1);  // Diagonal down-right
+        arrDirections[1] = new Position(1, 0);  // Right
+        arrDirections[2] = new Position(-1, 0); // Left
+        arrDirections[3] = new Position(-1, 1); // Diagonal up-right
+        arrDirections[4] = new Position(1, -1); // Diagonal down-left
+        arrDirections[5] = new Position(-1, -1); // Diagonal up-left
+        arrDirections[6] = new Position(0, 1);  // Down
+        arrDirections[7] = new Position(0, -1); // Up
     }
 
     // Locating a disc on the board and handling flips or bomb placement
@@ -53,10 +50,7 @@ public class GameLogic implements PlayableLogic {
                     player.reduce_unflippedable();  // Deduct unflippable disc usage
             }
 
-
             gameBoard[a.row()][a.col()] = disc;  // Place the disc on the board
-
-
             System.out.println(str + " placed a " + disc.getType() + " in " + a.toString());
             List<Position> historyCurrent=new Stack<>();
             Set<Disc> flips=flipsForLocation(a,historyCurrent);
@@ -72,9 +66,7 @@ public class GameLogic implements PlayableLogic {
             Move move = new Move(disc, a, history);
             historyMoves.push(move);
             turn = !turn;  // Toggle player turn
-            System.out.println();
             return true;
-
         }
         return false;
     }
@@ -157,6 +149,47 @@ public class GameLogic implements PlayableLogic {
     }
 
 
+    // Helper method to find simple flips (non-bomb)
+    private Stack<Position> flipsForSimple(Position a) {
+        Stack<Position> flippableDiscs = new Stack<>();
+        Stack<Position> temp = new Stack<>();
+        Player player = getCurrentPlayer();
+
+        // Iterate over all 8 possible directions
+        for (Position arrDirection : arrDirections) {
+            int xDirection = arrDirection.col();
+            int yDirection = arrDirection.row();
+
+            // Iterate in the current direction until an invalid or owned disc is encountered
+            for (int x = a.row() + xDirection, y = a.col() + yDirection;
+                 x >= 0 && x < boardSize && y >= 0 && y < boardSize;
+                 x += xDirection, y += yDirection) {
+                if (gameBoard[x][y] == null) {
+                    break;
+                } else if (gameBoard[x][y].getOwner().equals(player)) {
+                    // If an owned disc is found, record the flips
+                    while (!temp.empty()) {
+                        Position p = temp.pop();
+                        flippableDiscs.push(p);
+                    }
+                    break;
+                } else {
+                    temp.push(new Position(x, y));
+                }
+            }
+            temp.clear();
+        }
+        return flippableDiscs;
+    }
+
+    // Helper method to check if a position exists in a list
+    private boolean posissionContains(List<Position> list, Position position) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).equals(position))
+                return true;
+        }
+        return false;
+    }
 
     // Return the disc at a specific position on the board
     @Override
@@ -233,7 +266,36 @@ public class GameLogic implements PlayableLogic {
         return player;
     }
 
-
+//    // Count the number of discs that would be flipped if a disc is placed at position a
+//    @Override
+//    public int countFlips(Position a) {
+//        int otherPlayerCount = 0;
+//        int count = 0;
+//        Player player = getCurrentPlayer();
+//
+//        // Check each direction for potential flips
+//        for (Position arrDirection : arrDirections) {
+//            int xDirection = arrDirection.col();
+//            int yDirection = arrDirection.row();
+//            for (int x = a.row() + xDirection, y = a.col() + yDirection;
+//                 x >= 0 && x < boardSize && y >= 0 && y < boardSize;
+//                 x += xDirection, y += yDirection) {
+//                Disc disc = gameBoard[x][y];
+//                if (disc == null) {
+//                    break;
+//                } else if (disc.getOwner().equals(player)) {
+//                    count += otherPlayerCount;
+//                    break;
+//                } else {
+//                    if (!(disc instanceof UnflippableDisc)) {
+//                        otherPlayerCount++;
+//                    }
+//                }
+//            }
+//            otherPlayerCount = 0;
+//        }
+//        return count;
+//    }
     public int countFlips(Position a) {
         Set<Disc> flips= flipsForLocation(a,new Stack<Position>());
         return flips.size();
@@ -274,7 +336,6 @@ public class GameLogic implements PlayableLogic {
                 player1.addWin();  // Player 1 wins
             else if (winner == 2)
                 player2.addWin();  // Player 2 wins
-
             return true;
         }
         return false;
@@ -300,13 +361,8 @@ public class GameLogic implements PlayableLogic {
         }
 
         // Return the winner (1 or 2), or 0 for a tie
-        if (count1 > count2) {
-            System.out.println("Player 1 wins with " + count1 + " discs! Player 2 had " + count2 + " discs.");
-            return 1;
-        }
+        if (count1 > count2) return 1;
         else if (count2 > count1) {
-            System.out.println("Player 2 wins with " + count2 + " discs! Player 1 had " + count1 + " discs.");
-
             return 2;
         }
         return 0;
@@ -360,7 +416,6 @@ public class GameLogic implements PlayableLogic {
             gameBoard[p.row()][p.col()].setOwner(getCurrentPlayer());
             System.out.println("\tUndo: flipping back " + disc.getType() + " in " + p.toString());
         }
-        System.out.println();
         turn = !turn;  // Switch player turn
     }
 }
