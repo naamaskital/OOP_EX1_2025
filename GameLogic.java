@@ -9,8 +9,7 @@ public class GameLogic implements PlayableLogic {
     Position[] arrDirections = new Position[8];
     Stack<Move> historyMoves = new Stack<>();
     private boolean onlyHumen;
-
-    // Directions for possible moves (8 directions)
+    
     {
         arrDirections[0] = new Position(1, 1);  // Diagonal down-right
         arrDirections[1] = new Position(1, 0);  // Right
