@@ -9,7 +9,11 @@ public class RandomAI extends AIPlayer {
         super(isPlayerOne);
         this.random = new Random();
     }
-
+    /**
+     * Makes a random move based on the current game status.
+     * @param gameStatus The current state of the game, must implement PlayableLogic.
+     * @return A randomly selected move, or null if no moves are available.
+     */
     @Override
     public Move makeMove(PlayableLogic gameStatus) {
         if (gameStatus instanceof GameLogic) {

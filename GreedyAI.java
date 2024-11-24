@@ -8,47 +8,68 @@ public class GreedyAI extends AIPlayer{
         super(isPlayerOne);
     }
 
+    /**
+     * makeMove - Determines the best move for the AI player.
+     * @param gameStatus - The current state of the game (PlayableLogic interface).
+     * @return Move - The move selected by the AI.
+     */
     @Override
     public Move makeMove(PlayableLogic gameStatus) {
+        // Cast the general game status to a specific GameLogic instance
         GameLogic gameLogic = (GameLogic) gameStatus;
-        Player player=gameLogic.getCurrentPlayer();
-        List<Position> valid=gameLogic.ValidMoves();
+
+        // Retrieve the current player
+        Player player = gameLogic.getCurrentPlayer();
+
+        // Get a list of all valid moves for the current player
+        List<Position> valid = gameLogic.ValidMoves();
+
+        // Disc object to represent the player's disc
         Disc disc;
-        List<Integer> countValid=new ArrayList<>();
-        int max=0;
-        int indexMax=0;
-        List<Position> sameCount=new ArrayList<>();
-        for(int i=0;i<valid.size();i++){
-            Position p=valid.get(i);
-            int currentCount=gameLogic.countFlips(p);
-            countValid.add(currentCount);
-            if(currentCount>max){
-                max=currentCount;
-                indexMax=i;
-                sameCount.clear();
-                sameCount.add(valid.get(i));
-            } else if (currentCount==max) {
+
+        // List to store the count of flips for each valid move
+        List<Integer> countValid = new ArrayList<>();
+
+        // Variables to track the maximum flips and its corresponding index
+        int max = 0;
+        int indexMax = 0;
+
+        // List to store all positions with the maximum flip count
+        List<Position> sameCount = new ArrayList<>();
+
+        // Iterate through all valid moves
+        for (int i = 0; i < valid.size(); i++) {
+            Position p = valid.get(i); // Get the current position
+            int currentCount = gameLogic.countFlips(p); // Count flips for the current position
+            countValid.add(currentCount); // Add the flip count to the list
+
+            // Update max and track positions with the highest flip count
+            if (currentCount > max) {
+                max = currentCount; // Update maximum flips
+                indexMax = i; // Store the index of this move
+                sameCount.clear(); // Clear the previous list of max positions
+                sameCount.add(valid.get(i)); // Add the new max position
+            } else if (currentCount == max) {
+                // Add position to the list if it ties with the current maximum
                 sameCount.add(valid.get(i));
             }
         }
-        disc= new SimpleDisc(player);
-        if(sameCount.size()==1){
-            return new Move(disc,valid.get(indexMax),null);
-        }
-        else{
-            Collections.sort(sameCount,new MaxRelevantComparator());
-            for (int i = 0; i < sameCount.size(); i++) {
-                System.out.println(sameCount.get(i));
-            }
-            return new Move(disc,sameCount.get(sameCount.size()-1),null);
-        }
-    }
-    class MaxRelevantComparator implements Comparator<Position> {
-        @Override
-        public int compare(Position p1, Position p2) {
-            if(Integer.compare(p1.col(), p2.col())!=0) return Integer.compare(p1.col(), p2.col());
-            else return Integer.compare(p1.row(), p2.row());
+
+        // Create a disc for the current player
+        disc = new SimpleDisc(player);
+
+        // If there is only one move with the maximum flip count, return it
+        if (sameCount.size() == 1) {
+            return new Move(disc, valid.get(indexMax), null);
+        } else {
+            // Sort positions with the same flip count using the custom comparator
+            Collections.sort(sameCount, new Position.MaxRelevantComparator());
+
+            // Return the last position in the sorted list
+            return new Move(disc, sameCount.get(sameCount.size() - 1), null);
         }
     }
+
+
 }
 
