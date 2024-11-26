@@ -2,23 +2,22 @@ import java.util.*;
 
 public class GameLogic implements PlayableLogic {
     private final int boardSize = 8;
-    public Disc[][] gameBoard = new Disc[boardSize][boardSize];
+    private Disc[][] gameBoard = new Disc[boardSize][boardSize];
     private Player player1;
     private Player player2;
     private boolean turn = true;
-    Position[] arrDirections = new Position[8];
-    Stack<Move> historyMoves = new Stack<>();
+    private Stack<Move> historyMoves = new Stack<>();
     private boolean onlyHumen;
-    
+    private Position[] arrDirections = new Position[8];
     {
-        arrDirections[0] = new Position(1, 1);  // Diagonal down-right
-        arrDirections[1] = new Position(1, 0);  // Right
-        arrDirections[2] = new Position(-1, 0); // Left
-        arrDirections[3] = new Position(-1, 1); // Diagonal up-right
-        arrDirections[4] = new Position(1, -1); // Diagonal down-left
-        arrDirections[5] = new Position(-1, -1); // Diagonal up-left
-        arrDirections[6] = new Position(0, 1);  // Down
-        arrDirections[7] = new Position(0, -1); // Up
+        arrDirections[0] = new Position(1, 1);
+        arrDirections[1] = new Position(1, 0);
+        arrDirections[2] = new Position(-1, 0);
+        arrDirections[3] = new Position(-1, 1);
+        arrDirections[4] = new Position(1, -1);
+        arrDirections[5] = new Position(-1, -1);
+        arrDirections[6] = new Position(0, 1);
+        arrDirections[7] = new Position(0, -1);
     }
 
     // Locating a disc on the board and handling flips or bomb placement
@@ -52,7 +51,7 @@ public class GameLogic implements PlayableLogic {
 
             gameBoard[a.row()][a.col()] = disc;  // Place the disc on the board
             System.out.println(str + " placed a " + disc.getType() + " in " + a.toString());
-            List<Position> historyCurrent=new Stack<>();
+            Stack<Position> historyCurrent=new Stack<>();
             flipsForLocation(a,historyCurrent,new HashSet<Disc>());
             Stack<Position> history=new Stack<>();
             for (Position pos : historyCurrent) {
@@ -287,8 +286,12 @@ public class GameLogic implements PlayableLogic {
         }
 
         // Return the winner (1 or 2), or 0 for a tie
-        if (count1 > count2) return 1;
+        if (count1 > count2) {
+            System.out.println("Player 1 wins with " + count1 + " discs! Player 2 had " + count2 + " discs.");
+            return 1;
+        }
         else if (count2 > count1) {
+            System.out.println("Player 2 wins with " + count2 + " discs! Player 1 had " + count1 + " discs.");
             return 2;
         }
         return 0;

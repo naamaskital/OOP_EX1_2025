@@ -1,6 +1,7 @@
 public class HumanPlayer extends Player{
 
-    public HumanPlayer(boolean isPlayerOne ) {
+    public HumanPlayer(boolean isPlayerOne )
+    {
         super(isPlayerOne);
     }
 
